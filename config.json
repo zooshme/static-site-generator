@@ -1,0 +1,8 @@
+{
+	"aws": {
+		"key": "AKIAJWJR4YI7EP24M6GA",
+		"secret": "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",
+		"bucket": "ovidiust.com",
+		"region": "eu-west-1"
+	}
+}

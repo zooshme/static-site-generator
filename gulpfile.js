@@ -6,6 +6,16 @@ var jade = require('gulp-jade');
 var sourcemaps = require('gulp-sourcemaps');
 var livereload = require('gulp-livereload');
 var connect = require('gulp-connect');
+var awspublish = require('gulp-awspublish');
+var s3 = require('gulp-s3');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('./config.json'));
+var publisher = awspublish.create({
+	key: config.aws.key,
+	secret: config.aws.secret,
+	bucket: config.aws.bucket,
+	region: config.aws.region
+});
 
 
 gulp.task('stylus', function() {
@@ -25,8 +35,7 @@ gulp.task('stylus', function() {
 			includeContent: false,
 			sourceRoot: './compile/stylus/'
 		}))
-		.pipe(gulp.dest('./build/css/'))
-		.pipe(connect.reload());
+		.pipe(gulp.dest('./build/css/'));
 });
 
 gulp.task('jade', function() {
@@ -34,8 +43,7 @@ gulp.task('jade', function() {
 		.pipe(jade({
 			pretty: true
 		}))
-		.pipe(gulp.dest('./build/'))
-		.pipe(connect.reload());
+		.pipe(gulp.dest('./build/'));
 });
 
 gulp.task('connect', function() {
@@ -47,8 +55,12 @@ gulp.task('connect', function() {
 });
 
 gulp.task('build', ['stylus', 'jade']);
-gulp.task('upload', function() {
 
+gulp.task('publish', function() {
+	gulp.src('./build/**/*')
+		.pipe(publisher.publish())
+		.pipe(publisher.sync())
+		.pipe(awspublish.reporter());
 });
 
 gulp.task('default', ['stylus', 'jade', 'connect']);
